@@ -8,6 +8,7 @@ import (
 )
 
 type Receipt struct {
+	ID string `json:"id"`
 	Retailer string `json:"retailer"`
 	PurchaseDate string `json:"purchaseDate"`
 	PurchaseTime string `json:"purchaseTime"`
@@ -24,7 +25,15 @@ var receiptStore = make(map[string]Receipt)
 
 
 func Home(c echo.Context) error {
-	return c.String(http.StatusOK, "test")
+	receipts := make([]Receipt, 0, len(receiptStore))
+	for _, receipt := range receiptStore {
+		receipts = append(receipts, receipt)
+	}
+
+	return c.JSON(http.StatusOK, receipts)
+
+
+	return c.String(http.StatusOK, "")
 }
 
 func ProcessReceipt(c echo.Context) error {
@@ -35,6 +44,7 @@ func ProcessReceipt(c echo.Context) error {
 	}
 
 	receiptID := uuid.New().String()
+	receipt.ID = receiptID
 	receiptStore[receiptID] = *receipt
 
 	response := Response{ID: receiptID}
