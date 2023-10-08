@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/labstack/echo/v4"
-	"receipt-processor/cmd/handlers"
+	"receipt-processor/handlers"
 )
 
 func main() {
