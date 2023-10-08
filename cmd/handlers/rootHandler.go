@@ -28,6 +28,7 @@ type Response struct {
 
 
 var receiptStore = make(map[string]Receipt)
+var pointsStore = make(map[string]int)
 
 
 func Home(c echo.Context) error {
@@ -41,6 +42,22 @@ func Home(c echo.Context) error {
 
 	return c.String(http.StatusOK, "")
 }
+
+func GetReceiptPoints(c echo.Context) error {
+	// receiptID from url parameter
+	receiptID := c.Param("id")
+
+	points, exists := pointsStore[receiptID]
+
+	if !exists {
+		return c.JSON(http.StatusNotFound, "Receipt Not Found")
+	}
+
+	response := map[string]interface{}{"points": points}
+	return c.JSON(http.StatusOK, response)
+}
+
+
 
 func ProcessReceipt(c echo.Context) error {
 	// Parse json into Receipt struct
@@ -56,6 +73,7 @@ func ProcessReceipt(c echo.Context) error {
 	fmt.Println(receipt)
 
 	receiptStore[receiptID] = *receipt
+	pointsStore[receiptID] = receipt.Points
 
 	response := Response{ID: receiptID}
 	return c.JSON(http.StatusOK, response)
