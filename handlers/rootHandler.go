@@ -2,15 +2,11 @@ package handlers
 
 import (
 	"net/http"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
 	"receipt-processor/pkg"
 )
 
-type Response struct {
-	ID string `json:"id"`
-}
 
 
 var receiptStore = make(map[string]pkg.Receipt)
@@ -46,7 +42,7 @@ func GetReceiptPoints(c echo.Context) error {
 
 
 func ProcessReceipt(c echo.Context) error {
-	// Parse json into Receipt struct
+
 	receipt := new(pkg.Receipt)
 	if err := c.Bind(receipt); err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid JSON")
@@ -55,12 +51,18 @@ func ProcessReceipt(c echo.Context) error {
 	receiptID := uuid.New().String()
 	receipt.ID = receiptID
 
-	receipt.Points = pkg.CalculatePoints(receipt)
-	fmt.Println(receipt)
+	points, err := pkg.CalculatePoints(receipt)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, map[string]string{
+            "error": err.Error(),
+        })
+    }
+
+	receipt.Points = points
 
 	receiptStore[receiptID] = *receipt
 	pointsStore[receiptID] = receipt.Points
 
-	response := Response{ID: receiptID}
+	response := pkg.Response{ID: receiptID}
 	return c.JSON(http.StatusOK, response)
 }
