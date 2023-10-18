@@ -48,17 +48,25 @@ func ProcessReceipt(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid JSON")
 	}
 
+	notValid := pkg.ValidateReceipt(receipt)
+	if notValid != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": notValid.Error(),
+		})
+	}
+
 	receiptID := uuid.New().String()
 	receipt.ID = receiptID
+	receipt.Points = 0
 
-	points, err := pkg.CalculatePoints(receipt)
+	err := pkg.CalculatePoints(receipt)
     if err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{
             "error": err.Error(),
         })
     }
 
-	receipt.Points = points
+	// receipt.Points = points
 
 	receiptStore[receiptID] = *receipt
 	pointsStore[receiptID] = receipt.Points
