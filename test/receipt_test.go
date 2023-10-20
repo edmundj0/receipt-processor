@@ -72,14 +72,110 @@ func TestCalculatePoints(t *testing.T) {
 
     for _, test := range tests {
         t.Run("", func(t *testing.T) {
-            points, err := pkg.CalculatePoints(test.receipt)
+            err := pkg.CalculatePoints(test.receipt)
             if err != nil{
                 t.Errorf("CalculatePoints Error")
             }
 
-            if points != test.expectedPoints {
-                t.Errorf("Expected %d points, but got %d", test.expectedPoints, points)
+            if test.receipt.Points != test.expectedPoints {
+                t.Errorf("Expected %d points, but got %d", test.expectedPoints, test.receipt.Points)
             }
         })
+    }
+}
+
+func TestIsValidRetailer(t *testing.T) {
+    validRetailer := "Target"
+    invalidRetailer := "   Invalid Retailer   "
+
+    if !pkg.IsValidRetailer(validRetailer) {
+        t.Errorf("Expected %s to be a valid retailer", validRetailer)
+    }
+
+    if pkg.IsValidRetailer(invalidRetailer) {
+        t.Errorf("Expected %s to be an invalid retailer", invalidRetailer)
+    }
+}
+
+func TestIsValidDate(t *testing.T) {
+    validDate := "2022-01-01"
+    invalidDate := "20221301"
+
+    if !pkg.IsValidDate(validDate) {
+        t.Errorf("Expected %s to be a valid date", validDate)
+    }
+
+    if pkg.IsValidDate(invalidDate) {
+        t.Errorf("Expected %s to be an invalid date", invalidDate)
+    }
+}
+
+func TestIsValidPurchaseTime(t *testing.T) {
+    validTime := "13:01"
+    invalidTime := "25:01" // Invalid hour
+
+    if !pkg.IsValidPurchaseTime(validTime) {
+        t.Errorf("Expected %s to be a valid purchase time", validTime)
+    }
+
+    if pkg.IsValidPurchaseTime(invalidTime) {
+        t.Errorf("Expected %s to be an invalid purchase time", invalidTime)
+    }
+}
+
+func TestIsValidTotal(t *testing.T) {
+    validTotal := "35.35"
+    invalidTotal := "abc" // Invalid format
+
+    if !pkg.IsValidTotal(validTotal) {
+        t.Errorf("Expected %s to be a valid total amount", validTotal)
+    }
+
+    if pkg.IsValidTotal(invalidTotal) {
+        t.Errorf("Expected %s to be an invalid total amount", invalidTotal)
+    }
+}
+
+func TestIsValidItems(t *testing.T) {
+    validItems := []map[string]interface{}{
+    {
+        "shortDescription": "Mountain Dew 12PK",
+        "price": "6.49",
+    },
+    {
+        "shortDescription": "            ",
+        "price": "234346593459589345834583458.34",
+    },
+    }
+
+    invalidItems := []map[string]interface{}{
+        {
+            "shortDescription": "Invalid Item",
+            // Missing "price" field
+        },
+        {
+            // Missing "shortDescription" field
+            "price": "232323232323232232323.20",
+        },
+        {
+            "shortDescription": " ",
+            "price": "$23.50", // Invalid price
+        },
+        {
+            "shortDescription": "Invalid Item",
+            "price": "33.333", // Invalid price
+        },
+    }
+
+    for _, item := range validItems {
+        if !pkg.IsValidItems(item) {
+            t.Errorf("Expected item to be valid: %v", item)
+        }
+    }
+
+    for _, item := range invalidItems {
+        if pkg.IsValidItems(item) {
+            t.Errorf("Expected item to be invalid: %v", item)
+        }
     }
 }
