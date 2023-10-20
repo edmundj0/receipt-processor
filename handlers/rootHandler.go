@@ -32,7 +32,9 @@ func GetReceiptPoints(c echo.Context) error {
 	points, exists := pointsStore[receiptID]
 
 	if !exists {
-		return c.JSON(http.StatusNotFound, "Receipt Not Found")
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"description": "No receipt found for that id",
+		})
 	}
 
 	response := map[string]interface{}{"points": points}
@@ -50,8 +52,8 @@ func ProcessReceipt(c echo.Context) error {
 
 	notValid := pkg.ValidateReceipt(receipt)
 	if notValid != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": notValid.Error(),
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"description": "The receipt is invalid",
 		})
 	}
 
@@ -61,8 +63,8 @@ func ProcessReceipt(c echo.Context) error {
 
 	err := pkg.CalculatePoints(receipt)
     if err != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{
-            "error": err.Error(),
+        return c.JSON(http.StatusBadRequest, map[string]string{
+            "description": "The receipt is invalid",
         })
     }
 
