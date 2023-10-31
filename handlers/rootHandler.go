@@ -21,8 +21,6 @@ func Home(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, receipts)
 
-
-	return c.String(http.StatusOK, "")
 }
 
 func GetReceiptPoints(c echo.Context) error {
